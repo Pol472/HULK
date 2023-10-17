@@ -19,6 +19,9 @@ namespace Hulk.Biblioteca.Errores
                  case TipoError.SintacticError:
                  Mensaje = "! SYNTAX ERROR: "+ mensaje;
                  break;
+                 case TipoError.FuncionError:
+                 Mensaje = "! FUNCTION ERROR: "+ mensaje;
+                 break;
                  default:
                  Mensaje = mensaje;
                  break;
@@ -31,7 +34,8 @@ namespace Hulk.Biblioteca.Errores
     {
         SintacticError,
         LexicalError,
-        SemanticError
+        SemanticError,
+        FuncionError
     }
     
 

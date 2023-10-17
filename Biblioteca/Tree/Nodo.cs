@@ -8,7 +8,8 @@ namespace Hulk.Biblioteca.Tree
     {
 
         public abstract TokenType Type { get; }
-
-        
     }
+
+
+
 }

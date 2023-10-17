@@ -74,6 +74,20 @@ namespace Hulk.Biblioteca.Tree
         FuncionDeclaracion,
         Concatenador,
         StringToken,
+        PrintExpresion,
+        PrintKeyWord,
+        FuncionOperadorExpresion,
+        SenoExpresion,
+        CosenoExpresion,
+        LogaritmoExpresion,
+        SenKeyWord,
+        CosKeyWord,
+        LogKeyWord,
+        PI,
+        Euler,
+        CallFuncion,
+        Flecha,
+        SqrtKeyWord,
     }
     public enum TiposPrimitivosHulk
     {
@@ -86,5 +100,6 @@ namespace Hulk.Biblioteca.Tree
         IfExpresion,
         BloqueExpresion,
         MultipleAsignacion,
+        FuncionCall,
     }
 }

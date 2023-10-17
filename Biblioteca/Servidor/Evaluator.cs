@@ -11,18 +11,22 @@ namespace Hulk.Biblioteca
         {
             Declaracion = declaracion;
             Variables = variables;
+          
         }
         public Dictionary<VariableSymbol, object> Variables { get; }
+        
 
         public object Evalua()
         {
-           return EvaluaExpresion(Declaracion);
+            return EvaluaExpresion(Declaracion);
         }
         private void EvaluaDeclaracion(Semantic_Expresion declaracion)
         {
             switch (declaracion.Kind)
             {
-               
+                case SemanticType.FuncionDeclaracion:
+                    EvaluaFuncionDeclaracion((Semantic_FuncionDeclaracion)declaracion);
+                    break;
                 case SemanticType.DeclaracionExpresion:
                     EvaluaDeclaracionExpresion((Semantic_DeclaracionExpresion)declaracion);
                     break;
@@ -32,35 +36,49 @@ namespace Hulk.Biblioteca
                 case SemanticType.IfDeclaracion:
                     EvaluaIfDeclaracion((Semantic_IF_Declaracion)declaracion);
                     break;
-               default:
-                 throw new Exception($"Expresion,<{declaracion.Kind}> inesperada");
+                case SemanticType.PrintExpresion:
+                    EvaluaPrintExpresion((Semantic_PrintExpresion)declaracion);
+                    break;
+                default:
+                    throw new Exception($"Expresion,<{declaracion.Kind}> inesperada");
             }
+        }
+
+        private void EvaluaFuncionDeclaracion(Semantic_FuncionDeclaracion declaracion)
+        {
+            LastValue = $"Function '{declaracion.Nombre.Name}' has been adeed.";
+        }
+
+        private void EvaluaPrintExpresion(Semantic_PrintExpresion declaracion)
+        {
+            if (declaracion.Expresion != null)
+                EvaluaExpresion(declaracion.Expresion);
         }
 
         private void EvaluaIfDeclaracion(Semantic_IF_Declaracion declaracion)
         {
-           bool condicion = (bool)EvaluaExpresion(declaracion.Condicion);
-           if(condicion)
-           EvaluaExpresion(declaracion.CuerpoIf);
-           else
-           {
-            if(declaracion.CuerpoElse != null)
-            EvaluaExpresion(declaracion.CuerpoElse);
-           }
+            bool condicion = (bool)EvaluaExpresion(declaracion.Condicion);
+            if (condicion)
+                EvaluaExpresion(declaracion.CuerpoIf);
+            else
+            {
+                if (declaracion.CuerpoElse != null)
+                    EvaluaExpresion(declaracion.CuerpoElse);
+            }
         }
 
         private void EvaluaVariableDeclaracion(Semantic_VariableDeclaracion declaracion)
         {
-            foreach(var a in declaracion.Lista)
+            foreach (var a in declaracion.Lista)
             {
-            EvaluaExpresion(a.Valor);
+                EvaluaExpresion(a.Valor);
 
-            Variables[a.Variable] = LastValue;
+                Variables[a.Variable] = LastValue;
             }
             EvaluaExpresion(declaracion.Contexto);
         }
 
-       
+
 
         private void EvaluaDeclaracionExpresion(Semantic_DeclaracionExpresion declaracion)
         {
@@ -71,6 +89,16 @@ namespace Hulk.Biblioteca
         {
             switch (raiz)
             {
+                case Semantic_FuncionCall l:
+                    return EvaluaFuncionCall(l);
+                case Semantic_SqrtExpresion f:
+                    return EvaluaRaiz(f);
+                case Semantic_SenExpresion w:
+                    return EvaluaSen(w);
+                case Semantic_CosExpresion k:
+                    return EvaluaCos(k);
+                case Semantic_LogExpresion j:
+                     return EvaluaLog(j);
                 case Semantic_LiteralExpresion a:
                     return a.Value;
                 case Semantic_UnaryExpresion b:
@@ -89,13 +117,44 @@ namespace Hulk.Biblioteca
                 case Semantic_BinaryExpresion c:
                     return EvaluaExpresionBinaria(c);
                 case Semantic_Declaracion j:
-                {
-                    EvaluaDeclaracion(j);
-                    return LastValue;
-                }
+                    {
+                        EvaluaDeclaracion(j);
+                        return LastValue;
+                    }
                 default:
                     throw new Exception($"Expresion,<{raiz.Kind}> inesperada");
             }
+        }
+
+        private object EvaluaRaiz(Semantic_SqrtExpresion f)
+        {
+            var argumento = EvaluaExpresion(f.Argumento);
+            return Math.Sqrt((double)argumento);
+        }
+
+        private object EvaluaFuncionCall(Semantic_FuncionCall l)
+        {
+           return EvaluaExpresion(l.Expresion); 
+        }
+
+        private object EvaluaLog(Semantic_LogExpresion j)
+        {
+            var baseLog = (double) EvaluaExpresion(j.BaseLog);
+            var Argumento = (double) EvaluaExpresion(j.Argumento);
+            
+             return Math.Log(Argumento,baseLog);
+
+        }
+
+        private object EvaluaSen(Semantic_SenExpresion w)
+        {
+            var argumento = EvaluaExpresion(w.Argumento);
+            return Math.Sin((double)argumento);
+        }
+        private object EvaluaCos(Semantic_CosExpresion w)
+        {
+            var argumento = EvaluaExpresion(w.Argumento);
+            return Math.Cos((double)argumento);
         }
 
         private object EvaluaExpresionUnaria(Semantic_UnaryExpresion b)

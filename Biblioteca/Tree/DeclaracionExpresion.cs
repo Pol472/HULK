@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
     public abstract class DeclaracionNodo : Expresion
@@ -17,7 +19,7 @@ namespace Hulk.Biblioteca.Tree
 
         public Expresion Expresion { get; }
 
-        public override TiposPrimitivosHulk TipoDato => Expresion.TipoDato;
+        public override TipoHulk TipoDato => Expresion.TipoDato;
     }
 
 
@@ -39,7 +41,7 @@ namespace Hulk.Biblioteca.Tree
         public Expresion CuerpoIf { get; }
         public ElseDeclaracion CuerpoElse { get; }
 
-        public override TiposPrimitivosHulk TipoDato => TiposPrimitivosHulk.IfExpresion;
+        public override TipoHulk TipoDato => TipoHulk.Void;
     }
 
 
@@ -56,6 +58,6 @@ namespace Hulk.Biblioteca.Tree
         public Token ElseKeyWord { get; }
         public Expresion CuerpoElse { get; }
 
-        public override TiposPrimitivosHulk TipoDato => TiposPrimitivosHulk.ElseExpresion;
+        public override TipoHulk TipoDato => TipoHulk.Void;
     }
 }

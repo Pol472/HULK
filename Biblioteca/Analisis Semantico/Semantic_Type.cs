@@ -1,6 +1,6 @@
 namespace Hulk.Biblioteca.Semantic
 {
-    internal enum SemanticType
+    public enum SemanticType
     {
         UnaryExpresion,
         LiteralExpresion,
@@ -12,16 +12,26 @@ namespace Hulk.Biblioteca.Semantic
         VariableDeclaracion,
         IfDeclaracion,
         Parentesis,
-        Declaracion
+        Declaracion,
+        PrintExpresion,
+        SenExpresion,
+        CosExpresion,
+        LogExpresion,
+        FuncionCall,
+        FuncionDeclaracion,
+        SqrtExpresion
     }
     public enum TipoHulk
     {
         Number,
         Boolean,
+        Void,
         Identificador,
         Bloque,
         LetExpresion,
-        String
+        String,
+        FuncionDeclaracion,
+        FuncionCall
     }
     
 

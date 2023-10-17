@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
     public sealed class UnaryExpresion : Expresion
@@ -12,6 +14,6 @@ namespace Hulk.Biblioteca.Tree
         }
         public override TokenType Type => TokenType.UnaryExpresion;
 
-        public override TiposPrimitivosHulk TipoDato => Operando.TipoDato;
+        public override TipoHulk TipoDato => Operando.TipoDato;
     }
 }

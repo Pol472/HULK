@@ -10,7 +10,7 @@ namespace Hulk.Biblioteca.Semantic
         {
             Padre = padre;
         }
-        public bool Try_Asignar(string name, out VariableSymbol variable)
+        public bool Try_AsignarVariable(string name, out VariableSymbol variable)
         {
 
             
@@ -20,12 +20,14 @@ namespace Hulk.Biblioteca.Semantic
             
             if (Padre == null)
                 return false;
-            return Padre.Try_Asignar(name, out variable);
+            return Padre.Try_AsignarVariable(name, out variable);
             
         }
 
-        public bool Try_Declarar(VariableSymbol variable)
+        public bool Try_DeclararVariable(VariableSymbol variable)
         {
+            
+
             if (Variables.ContainsKey(variable.Nombre))
                 return false;
 
@@ -36,6 +38,10 @@ namespace Hulk.Biblioteca.Semantic
         public List<VariableSymbol> GetDeclaredVariables()
         {
           return Variables.Values.ToList();
+        }
+        public void AddVariableFuncion(VariableSymbol variable)
+        {
+            Variables.Add(variable.Nombre,variable);
         }
         
     }

@@ -50,10 +50,9 @@ namespace Hulk.Biblioteca
                     Tipo = TokenType.EndOfLine;
                     break;
                 case ',':
-                    IsWhiteSpace();
+                    Tipo = TokenType.Coma;
+                    position++;
                     break;
-
-
                 //Operadores aritmeticos
                 case '+':
                     Tipo = TokenType.PlusToken;
@@ -91,13 +90,17 @@ namespace Hulk.Biblioteca
                 //Comparadores
                 case '=':
                     position++;
-                    if (Actual != '=')
-                        Tipo = TokenType.IgualAsignador;
-                    else
+                    if (Actual == '>')
+                    {
+                        Tipo = TokenType.Flecha;
+                        position++;
+                    }
+                    else if (Actual == '=')
                     {
                         Tipo = TokenType.IgualComparador;
                         position++;
                     }
+                    else Tipo = TokenType.IgualAsignador;
                     break;
                 case '!':
                     position++;
@@ -138,7 +141,7 @@ namespace Hulk.Biblioteca
                     Tipo = TokenType.CloseParenToken;
                     position++;
                     break;
-                
+
                 case '"':
                     IsString();
                     break;
@@ -147,6 +150,7 @@ namespace Hulk.Biblioteca
                     Tipo = TokenType.Concatenador;
                     position++;
                     break;
+
                 default:
                     //Reconocimiento de Digitos
                     if (char.IsDigit(Actual))
@@ -248,7 +252,7 @@ namespace Hulk.Biblioteca
         }
         private void IsWhiteSpace()
         {
-            while (char.IsWhiteSpace(Actual) || Actual == ',')
+            while (char.IsWhiteSpace(Actual))
                 position++;
 
             Tipo = TokenType.WhiteSpaceToken;

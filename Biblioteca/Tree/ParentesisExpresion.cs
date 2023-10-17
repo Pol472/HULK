@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
 
@@ -15,7 +17,7 @@ namespace Hulk.Biblioteca.Tree
         }
 
         public override TokenType Type => TokenType.ParentesisExpresion;
-        public override TiposPrimitivosHulk TipoDato => Expresion.TipoDato;
+        public override TipoHulk TipoDato => Expresion.TipoDato;
 
 
     }

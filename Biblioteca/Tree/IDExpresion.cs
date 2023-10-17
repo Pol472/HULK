@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
     public sealed class IDExpresion : Expresion
@@ -11,6 +13,6 @@ namespace Hulk.Biblioteca.Tree
 
         public override TokenType Type => TokenType.IDExpresion;
 
-        public override TiposPrimitivosHulk TipoDato => TiposPrimitivosHulk.Identificador;
+        public override TipoHulk TipoDato => TipoHulk.Identificador;
     }
 }

@@ -1,4 +1,5 @@
 using Hulk.Biblioteca.Errores;
+using Hulk.Biblioteca.Tree;
 
 namespace Hulk.Biblioteca.Semantic
 {
@@ -11,12 +12,14 @@ namespace Hulk.Biblioteca.Semantic
             Errores = errores;
             Variables = variables;
             Declaracion = declaracion;
+            
         }
 
         public Semantic_GlobalAmbito Padre { get; }
         public List<Error> Errores { get; }
         public List<VariableSymbol> Variables { get; }
         public Semantic_Expresion Declaracion{ get; }
+        
     }
 
 }

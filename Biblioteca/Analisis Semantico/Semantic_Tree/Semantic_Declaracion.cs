@@ -1,9 +1,10 @@
+using Hulk.Biblioteca.Tree;
+
 namespace Hulk.Biblioteca.Semantic
 {
-    internal abstract class Semantic_Declaracion : Semantic_Expresion
+   internal abstract class Semantic_Declaracion : Semantic_Expresion
     {
        public override SemanticType Kind => SemanticType.Declaracion;
-
     }
     
 
@@ -60,7 +61,33 @@ namespace Hulk.Biblioteca.Semantic
 
         
     }
-    
+    internal class Semantic_PrintExpresion : Semantic_Declaracion
+    {
+        public Semantic_PrintExpresion(Semantic_Expresion expresion)
+        {
+            Expresion = expresion;
+        }
+
+        public override TipoHulk TipoHulk => Expresion.TipoHulk ;
+        public override SemanticType Kind => SemanticType.PrintExpresion;
+        public Semantic_Expresion Expresion { get; }
+    }
+    internal class Semantic_FuncionDeclaracion : Semantic_Declaracion
+    {
+        public Semantic_FuncionDeclaracion(FuncionSymbol nombre,List<Token> parametros, Semantic_Expresion cuerpo) 
+        {
+            Nombre = nombre;
+            Parametros = parametros;
+            Cuerpo = cuerpo;
+        }
+
+        public override TipoHulk TipoHulk => TipoHulk.FuncionDeclaracion;
+        public override SemanticType Kind => SemanticType.FuncionDeclaracion;
+        public FuncionSymbol Nombre { get; }
+        public List<Token> Parametros { get; }
+        public Semantic_Expresion Cuerpo { get; }
+    }
+
 
 
 }

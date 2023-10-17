@@ -1,6 +1,7 @@
 using System.Linq;
 using Hulk.Biblioteca.Semantic;
 using Hulk.Biblioteca.Errores;
+using Hulk.Biblioteca.Tree;
 
 namespace Hulk.Biblioteca.Servidor
 {
@@ -10,14 +11,17 @@ namespace Hulk.Biblioteca.Servidor
 
         public Servidor Padre { get; }
         public SyntaxTree Arbol { get; }
-        public Servidor(SyntaxTree arbol) : this(null, arbol)
-        {
-        }
-        private Servidor(Servidor padre, SyntaxTree arbol)
+        public Dictionary<FuncionSymbol, FuncionDeclaracion> Funciones { get; }
+
+        public Servidor(Servidor padre, SyntaxTree arbol)
         {
             Padre = padre;
             Arbol = arbol;
+            
         }
+
+       
+
         internal Semantic_GlobalAmbito AmbitoGlobal
         {
             get
@@ -30,6 +34,9 @@ namespace Hulk.Biblioteca.Servidor
                 return _ambitoGlobal;
             }
         }
+
+        
+
         public Retorno Sirve(Dictionary<VariableSymbol, object> variables)
         {
 
@@ -44,10 +51,7 @@ namespace Hulk.Biblioteca.Servidor
             return new Retorno(Array.Empty<Error>(), valorResultado);
 
         }
-        public Servidor ContinuaCon(SyntaxTree arbol)
-        {
-          return new Servidor(this,arbol);
-        }
+        
 
 
 

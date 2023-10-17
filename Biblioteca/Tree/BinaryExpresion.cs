@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
 
@@ -17,6 +19,6 @@ namespace Hulk.Biblioteca.Tree
         }
         public override TokenType Type => TokenType.BinaryExpresion;
 
-        public override TiposPrimitivosHulk TipoDato => Left.TipoDato;
+        public override TipoHulk TipoDato => Left.TipoDato;
     }
 }

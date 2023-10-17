@@ -1,3 +1,5 @@
+using Hulk.Biblioteca.Semantic;
+
 namespace Hulk.Biblioteca.Tree
 {
     public sealed class AsignacionVariableExpresion : Expresion
@@ -20,6 +22,6 @@ namespace Hulk.Biblioteca.Tree
 
         public override TokenType Type => TokenType.AsignacionVariableExpresion;
 
-        public override TiposPrimitivosHulk TipoDato => TiposPrimitivosHulk.LetInExpresion;
+        public override TipoHulk TipoDato => TipoHulk.Void;
     }
 }

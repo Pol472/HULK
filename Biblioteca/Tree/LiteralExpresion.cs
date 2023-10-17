@@ -1,3 +1,4 @@
+using Hulk.Biblioteca.Semantic;
 namespace Hulk.Biblioteca.Tree
 {
 
@@ -5,7 +6,7 @@ namespace Hulk.Biblioteca.Tree
     {
         public Token Literal { get; }
         public object Value { get; }
-        public override TiposPrimitivosHulk TipoDato {get;}
+        public override TipoHulk TipoDato {get;}
         public override TokenType Type => TokenType.LiteralExpresion;
         public LiteralExpresion(Token literal) : this(literal, literal.Value)
         {
@@ -18,16 +19,16 @@ namespace Hulk.Biblioteca.Tree
             switch(Literal.Type)
             {
                 case TokenType.IdentificadorToken:
-                TipoDato = TiposPrimitivosHulk.Identificador;
+                TipoDato = TipoHulk.Identificador;
                 break;
                 case TokenType.StringToken:
-                TipoDato = TiposPrimitivosHulk.String;
+                TipoDato = TipoHulk.String;
                 break;
                 case TokenType.NumberToken:
-                TipoDato = TiposPrimitivosHulk.Number;
+                TipoDato = TipoHulk.Number;
                 break;
                 case TokenType.FalseKeyWord:
-                TipoDato = TiposPrimitivosHulk.Identificador;
+                TipoDato = TipoHulk.Boolean;
                 break;
             }
         }

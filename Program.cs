@@ -4,16 +4,18 @@ using Hulk.Biblioteca.Semantic;
 using Hulk.Biblioteca.Servidor;
 using Hulk.Biblioteca.Tree;
 using Hulk.Biblioteca.Errores;
+using Hulk.Biblioteca.Parser;
 
 namespace Hulk
 {
 
-    class Porgram
+    public static class Program
     {
+        public static Dictionary<string,FuncionDeclaracion> funciones = new Dictionary<string,FuncionDeclaracion>();
         public static void Main(string[] args)
         {
-
-
+         
+           
 
             while (true)
             {
@@ -24,7 +26,7 @@ namespace Hulk
                 Console.Write("> ");
                 Console.ResetColor();
                 var line = Console.ReadLine();
-              
+
                 if (string.IsNullOrEmpty(line))
                     break;
                 else if (line == "#clear")
@@ -32,25 +34,31 @@ namespace Hulk
                     Console.Clear();
                     continue;
                 }
-          
+
                 var lexer = new Lexer(line);
 
                 var syntaxTree = SyntaxTree.Parse(line);
+
+                if(syntaxTree.Declaracion== null){
+                foreach(var a in Parser.Funciones)
+                 funciones.TryAdd(a.Key,a.Value);
+                continue;
+                }
                 if (syntaxTree != null)
                 {
-                    if(syntaxTree.Errores.Any()) 
+                    if (syntaxTree.Errores.Any())
                     {
                         ImprimeError(syntaxTree);
                         continue;
                     }
-                    var semantic_expresion = previous == null ? new Servidor(syntaxTree) : previous.ContinuaCon(syntaxTree);
-
+                    var semantic_expresion = new Servidor(previous,syntaxTree);
+                    
                     var expresion = semantic_expresion.Sirve(variables);
-
-
+                    
+                    
                     if (expresion.Errores.Any())
                     {
-                          ImprimeError(expresion);
+                        ImprimeError(expresion);
                     }
                     else
                     {
@@ -80,6 +88,7 @@ namespace Hulk
             ConsoleColor amarillo = ConsoleColor.DarkYellow;
             ConsoleColor rojoFuerte = ConsoleColor.DarkRed;
             ConsoleColor rojo = ConsoleColor.Red;
+            ConsoleColor magenta = ConsoleColor.DarkMagenta;
             List<Error> alfa = expresion.Errores.ToList();
 
             switch (alfa[0].Tipo)
@@ -92,6 +101,9 @@ namespace Hulk
                     break;
                 case TipoError.SintacticError:
                     Console.ForegroundColor = rojo;
+                    break;
+                case TipoError.FuncionError:
+                    Console.ForegroundColor = magenta;
                     break;
             }
             Console.WriteLine(alfa[0].Mensaje);
@@ -102,6 +114,7 @@ namespace Hulk
             ConsoleColor amarillo = ConsoleColor.DarkYellow;
             ConsoleColor rojoFuerte = ConsoleColor.DarkRed;
             ConsoleColor rojo = ConsoleColor.Red;
+            ConsoleColor magenta = ConsoleColor.DarkMagenta;
             List<Error> alfa = expresion.Errores.ToList();
 
             switch (alfa[0].Tipo)
@@ -115,11 +128,14 @@ namespace Hulk
                 case TipoError.SintacticError:
                     Console.ForegroundColor = rojo;
                     break;
+                case TipoError.FuncionError:
+                    Console.ForegroundColor = magenta;
+                    break;
             }
             Console.WriteLine(alfa[0].Mensaje);
             Console.ResetColor();
         }
 
-        
+
     }
 }

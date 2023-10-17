@@ -36,6 +36,20 @@ namespace Hulk.Biblioteca.Parser
                     return "if";
                 case TokenType.ElseKeyWord:
                     return "else";
+                case TokenType.PrintKeyWord:
+                    return "print";
+                case TokenType.SenKeyWord:
+                    return "sen";
+                case TokenType.CosKeyWord:
+                    return "cos";
+                case TokenType.LogKeyWord:
+                    return "log";
+                case TokenType.SqrtKeyWord:
+                    return "sqrt";
+                case TokenType.PI:
+                    return "PI";
+                case TokenType.Euler:
+                    return "E";
                 case TokenType.MayorQue:
                     return ">";
                 case TokenType.MayorOIgual:
@@ -48,6 +62,8 @@ namespace Hulk.Biblioteca.Parser
                     return "==";
                 case TokenType.IgualAsignador:
                     return "=";
+                case TokenType.Flecha:
+                    return "=>";
                 case TokenType.AndLogic:
                     return "&";
                 case TokenType.OrLogic:
@@ -113,10 +129,22 @@ namespace Hulk.Biblioteca.Parser
         {
             switch (text)
             {
+                case "PI":
+                    return TokenType.PI;
+                case "E":
+                    return TokenType.Euler;
                 case "true":
                     return TokenType.TrueKeyWord;
                 case "false":
                     return TokenType.FalseKeyWord;
+                case "sen":
+                    return TokenType.SenKeyWord;
+                case "cos":
+                    return TokenType.CosKeyWord;
+                case "log":
+                    return TokenType.LogKeyWord;
+                case "sqrt":
+                    return TokenType.SqrtKeyWord;
                 case "let":
                     return TokenType.LetKeyWord;
                 case "in":
@@ -125,6 +153,8 @@ namespace Hulk.Biblioteca.Parser
                     return TokenType.IfKeyWord;
                 case "else":
                     return TokenType.ElseKeyWord;
+                case "print":
+                    return TokenType.PrintKeyWord;
                 case "function":
                     return TokenType.FuncionKeyWord;
                 default:
