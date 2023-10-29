@@ -62,7 +62,6 @@ namespace Hulk
                     }
                     else
                     {
-
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.Write("► ");
                         Console.ForegroundColor = ConsoleColor.DarkGreen;

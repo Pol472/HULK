@@ -11,7 +11,7 @@ namespace Hulk.Biblioteca.Servidor
 
         public Servidor Padre { get; }
         public SyntaxTree Arbol { get; }
-        public Dictionary<FuncionSymbol, FuncionDeclaracion> Funciones { get; }
+        
 
         public Servidor(Servidor padre, SyntaxTree arbol)
         {
@@ -46,7 +46,9 @@ namespace Hulk.Biblioteca.Servidor
             {
                 return new Retorno(errores, null);
             }
-            Evaluator resultado = new Evaluator(AmbitoGlobal.Declaracion, variables);
+            var semantic_Funcion = Semantic_Parser.Conecta_CuerpoFuncion(Hulk.Program.funciones);
+
+            Evaluator resultado = new Evaluator(AmbitoGlobal.Declaracion, variables,semantic_Funcion);
             object valorResultado = resultado.Evalua();
             return new Retorno(Array.Empty<Error>(), valorResultado);
 

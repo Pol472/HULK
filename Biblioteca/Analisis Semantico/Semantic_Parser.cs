@@ -160,17 +160,25 @@ namespace Hulk.Biblioteca.Semantic
                     return ConectaSqrtExpresion(expresion);
                 default:
                     int cant = expresion.Argumentos.Count;
+                    List<Semantic_Expresion> argumentos = new List<Semantic_Expresion>();
                     FuncionSymbol simbolo = new FuncionSymbol(nombre, cant);
                     if (!Hulk.Program.funciones.ContainsKey(simbolo.Name))
                     {
                         errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with {cant} parameters do not exist."));
                         return null;
                     }
-                    var funcionDeclaracion = Hulk.Program.funciones[simbolo.Name];
-                    var argumentos = expresion.Argumentos;
-                    var parametros = funcionDeclaracion.Parametros;
+                    if(Hulk.Program.funciones[simbolo.Name].Parametros.Count != expresion.Argumentos.Count)
+                    {
+                        errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with {cant} parameters do not exist."));
+                        return null;
+                    }
+                    foreach(var a in expresion.Argumentos)
+                    {
+                        var semantic = ConectaExpresion(a);
+                        argumentos.Add(semantic);
+                    }
         
-                    return ConectaExpresion(funcionDeclaracion);
+                  return new Semantic_FuncionCall(simbolo,argumentos);
             }
         }
 
@@ -321,6 +329,24 @@ namespace Hulk.Biblioteca.Semantic
 
             return new Semantic_VariableExpresion(variable);
 
+        }
+
+        public static Dictionary<string, Semantic_Expresion> Conecta_CuerpoFuncion(Dictionary<string, FuncionDeclaracion> funciones)
+        {
+            var diccionarioDeclaracion = funciones;
+            var cuerpos_Funcion = new Dictionary<string,Semantic_Expresion>();
+            foreach( var  funcion in funciones )
+            {
+                var semantic_Object = new Semantic_Parser(null);
+                foreach( var param in funcion.Value.Parametros)
+                {
+                    semantic_Object.Ambito.Try_DeclararVariable(new VariableSymbol(param.Text, param.GetType(),TipoHulk.Number));
+                }
+                var expresion = semantic_Object.ConectaExpresion(funcion.Value.Cuerpo);
+                cuerpos_Funcion.Add(funcion.Value.Identificador.Text,expresion);
+
+            }
+            return cuerpos_Funcion;
         }
     }
 

@@ -7,13 +7,17 @@ namespace Hulk.Biblioteca
     {
         private object LastValue;
         private readonly Semantic_Expresion Declaracion;
-        public Evaluator(Semantic_Expresion declaracion, Dictionary<VariableSymbol, object> variables)
+        public Dictionary<VariableSymbol, object> Variables { get; }
+        private readonly Stack<Dictionary<string, object>> Locales = new Stack<Dictionary<string, object>>();
+        public Dictionary<string, Semantic_Expresion> Cuerpos_Funcion { get; }
+
+        public Evaluator(Semantic_Expresion declaracion, Dictionary<VariableSymbol, object> variables, Dictionary<string, Semantic_Expresion> cuerpos_Funcion)
         {
             Declaracion = declaracion;
             Variables = variables;
-          
+            Cuerpos_Funcion = cuerpos_Funcion;
         }
-        public Dictionary<VariableSymbol, object> Variables { get; }
+        
         
 
         public object Evalua()
@@ -105,7 +109,14 @@ namespace Hulk.Biblioteca
                     return EvaluaExpresionUnaria(b);
                 case Semantic_VariableExpresion w:
                     {
-                        var valor = Variables[w.Variable];
+                        object valor = null;
+                        try{
+                        valor = Variables[w.Variable];
+                        }
+                        catch{
+                         var locals = Locales.Peek();
+                        valor = locals[w.Variable.Nombre];
+                        }
                         return valor;
                     }
                 case Semantic_AsignacionVariable m:
@@ -134,8 +145,21 @@ namespace Hulk.Biblioteca
 
         private object EvaluaFuncionCall(Semantic_FuncionCall l)
         {
-           return EvaluaExpresion(l.Expresion); 
+            var locals = new Dictionary<string, object>();
+            for ( int i = 0 ;i<l.Argumentos.Count;i++)
+            {
+                var valor = EvaluaExpresion(l.Argumentos[i]);
+                var nombre = Hulk.Program.funciones[l.Simbolo.Name].Parametros[i].Text;
+                locals.Add(nombre,valor);
+            }
+            Locales.Push(locals);
+            var result = EvaluaExpresion(Cuerpos_Funcion[l.Simbolo.Name]);
+            Locales.Pop();
+            return result;
+            
         }
+
+        
 
         private object EvaluaLog(Semantic_LogExpresion j)
         {

@@ -2,18 +2,17 @@ namespace Hulk.Biblioteca.Semantic
 {
     internal class Semantic_FuncionCall : Semantic_Declaracion
     {
-        public Semantic_FuncionCall(FuncionSymbol simbolo,Semantic_Expresion expresion)
+        public Semantic_FuncionCall(FuncionSymbol simbolo,List<Semantic_Expresion> argumentos)
         {
             Simbolo = simbolo;
-            Expresion = expresion;
+            Argumentos = argumentos;
         }
 
-        public override TipoHulk TipoHulk => TipoHulk.FuncionCall;
+        public override TipoHulk TipoHulk => Argumentos[0].TipoHulk;
         public override SemanticType Kind => SemanticType.FuncionCall;
 
         public FuncionSymbol Simbolo { get; }
-        public Semantic_Expresion Expresion { get; }
-  
+        public List<Semantic_Expresion> Argumentos { get; }
     }
 
 
