@@ -2,7 +2,8 @@ using Hulk.Biblioteca.Tree;
 
 namespace Hulk.Biblioteca.Semantic
 {
-   internal abstract class Semantic_Declaracion : Semantic_Expresion
+    //Clase abstracta declaracion
+    internal abstract class Semantic_Declaracion : Semantic_Expresion
     {
        public override SemanticType Kind => SemanticType.Declaracion;
     }
@@ -24,6 +25,8 @@ namespace Hulk.Biblioteca.Semantic
 
         
     }
+
+    //Objeto semantico de la expresion let-in
     internal sealed class Semantic_VariableDeclaracion : Semantic_Declaracion
     {
         public Semantic_VariableDeclaracion(List<Semantic_AsignacionVariable> lista, Semantic_Expresion contexto)
@@ -42,6 +45,7 @@ namespace Hulk.Biblioteca.Semantic
 
         
     }
+    //Objeto semantico if-else
     internal sealed class Semantic_IF_Declaracion : Semantic_Declaracion
     {
         public Semantic_IF_Declaracion(Semantic_Expresion condicion, Semantic_Expresion cuerpoIf, Semantic_Expresion? cuerpoElse)
@@ -61,6 +65,7 @@ namespace Hulk.Biblioteca.Semantic
 
         
     }
+    //Objeto semantico llamada a print
     internal class Semantic_PrintExpresion : Semantic_Declaracion
     {
         public Semantic_PrintExpresion(Semantic_Expresion expresion)
@@ -72,6 +77,8 @@ namespace Hulk.Biblioteca.Semantic
         public override SemanticType Kind => SemanticType.PrintExpresion;
         public Semantic_Expresion Expresion { get; }
     }
+    
+    //Objeto semantico de funcion declaracion
     internal class Semantic_FuncionDeclaracion : Semantic_Declaracion
     {
         public Semantic_FuncionDeclaracion(FuncionSymbol nombre,List<Token> parametros, Semantic_Expresion cuerpo) 

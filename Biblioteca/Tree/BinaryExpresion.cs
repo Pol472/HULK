@@ -3,7 +3,7 @@ using Hulk.Biblioteca.Semantic;
 namespace Hulk.Biblioteca.Tree
 {
 
-
+    // Aqui se manejan las expresiones afectadas por operadores binarios
     public sealed class BinaryExpresion : Expresion
     {
         public Expresion Left { get; }

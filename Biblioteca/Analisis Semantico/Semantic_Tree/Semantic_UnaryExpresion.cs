@@ -1,6 +1,8 @@
 using Hulk.Biblioteca.Tree;
 namespace Hulk.Biblioteca.Semantic
 {
+
+    //Objeto semantico de las expresiones unarias
     internal  class Semantic_UnaryExpresion : Semantic_Expresion
     {
         public Semantic_UnaryExpresion(Semantic_UnaryOperador operador, Semantic_Expresion operando)
@@ -20,6 +22,7 @@ namespace Hulk.Biblioteca.Semantic
 
         
     }
+    //Objetos operador unario
     internal sealed class Semantic_UnaryOperador
     {
         public Semantic_UnaryOperador(TokenType tokentype,
@@ -40,15 +43,16 @@ namespace Hulk.Biblioteca.Semantic
         public TipoHulk ReturnType { get; }
         private static Semantic_UnaryOperador[] operadores =
         {
+            //Negacion Logica !
             new Semantic_UnaryOperador(TokenType.Negation,Semantic_UnaryOperadorType.NegacionLogica,TipoHulk.Boolean),
+            //Identidad +x = x
             new Semantic_UnaryOperador(TokenType.PlusToken,Semantic_UnaryOperadorType.Identidad,TipoHulk.Number),
-            new Semantic_UnaryOperador(TokenType.MinusToken,Semantic_UnaryOperadorType.Negacion,TipoHulk.Number),
-            new Semantic_UnaryOperador(TokenType.Sen,Semantic_UnaryOperadorType.Seno,TipoHulk.Number),
-            new Semantic_UnaryOperador(TokenType.Cos,Semantic_UnaryOperadorType.Coseno,TipoHulk.Number),
-            new Semantic_UnaryOperador(TokenType.Sqrt,Semantic_UnaryOperadorType.RaizCuadrada,TipoHulk.Number)
+            //Opuesto -(x) = -x
+            new Semantic_UnaryOperador(TokenType.MinusToken,Semantic_UnaryOperadorType.Negacion,TipoHulk.Number)
         };
         public static Semantic_UnaryOperador Semantic_Parse_UO(TokenType tokenType, TipoHulk operandoTipo)
         {
+            //Funciona de manera analoga a su homologo para expresiones binarias
             foreach (var a in operadores)
             {
                 if (a.Tokentype == tokenType && a.Operando == operandoTipo)
@@ -59,14 +63,12 @@ namespace Hulk.Biblioteca.Semantic
         }
 
     }
+    //Operadores unarios
       internal enum Semantic_UnaryOperadorType
     {
         Negacion,
         Identidad,
-        NegacionLogica,
-        Seno,
-        Coseno,
-        RaizCuadrada
+        NegacionLogica
     }
 
 }

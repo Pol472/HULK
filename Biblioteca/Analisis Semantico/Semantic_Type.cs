@@ -1,5 +1,6 @@
 namespace Hulk.Biblioteca.Semantic
 {
+    //Enum de los tipos de expresiones semanticas que son devueltos al evaluador
     public enum SemanticType
     {
         UnaryExpresion,
@@ -21,17 +22,16 @@ namespace Hulk.Biblioteca.Semantic
         FuncionDeclaracion,
         SqrtExpresion
     }
+
+    //Tipos de Hulk usados para chequeo de tipos en el analisis semantico
     public enum TipoHulk
     {
         Number,
         Boolean,
         Void,
         Identificador,
-        Bloque,
-        LetExpresion,
         String,
-        FuncionDeclaracion,
-        FuncionCall
+        FuncionDeclaracion
     }
     
 

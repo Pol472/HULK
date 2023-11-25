@@ -1,5 +1,7 @@
 namespace Hulk.Biblioteca.Semantic
 {
+
+    //Objeto variable expresion, que contiene al simbolo de la variable para ser llamada en el evaluador
     internal  class Semantic_VariableExpresion : Semantic_Expresion
     {
         public Semantic_VariableExpresion(VariableSymbol variable)
@@ -12,6 +14,8 @@ namespace Hulk.Biblioteca.Semantic
 
         public override TipoHulk TipoHulk => Variable.TipoHulk ;
     }
+
+    //Objeto asignacion de variable 
     
     internal sealed class Semantic_AsignacionVariable : Semantic_Expresion
     {

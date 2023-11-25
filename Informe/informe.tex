@@ -1,0 +1,267 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[left=2.5cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+
+
+
+
+\definecolor{colorgreen}{rgb}{0,0.6,0}
+\definecolor{colorgray}{rgb}{0.5,0.5,0.5}
+\definecolor{colorpurple}{rgb}{0.58,0,0.82}
+\definecolor{colorback}{RGB}{255,255,204}
+\definecolor{colorbackground}{RGB}{211,211,211}
+%Definiendo el estilo de las porciones de codigo
+\lstset{
+ backgroundcolor=\color{colorbackground},
+commentstyle=\color{colorgreen},
+keywordstyle=\color{colorpurple},
+numberstyle=\tiny\color{colorgray},
+stringstyle=\color{colorgreen},
+basicstyle=\ttfamily\footnotesize,
+breakatwhitespace=false,
+breaklines=true,
+captionpos=b,
+keepspaces=true,
+numbers=left,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+frame=single,
+framesep=2pt,
+rulecolor=\color{black},
+framerule=1pt
+}
+
+
+
+\begin{document}
+
+
+\begin{center}
+\text{\Huge HULK}\\
+\vspace {2cm}
+\text{\huge Richard Alejandro Matos Arderí C111}\\
+\vspace {1cm}
+\text{\Large Facultad de Matemática y Computación, Universidad de La Habana}\\
+\vspace {0.5cm}
+\text{2023}\\
+\vspace {10cm}
+\begin{figure}[h]
+       \center
+       \includegraphics[width=8cm]{matcom.jpg}
+\end{figure}
+\end{center}
+
+\newpage
+\begin{abstract}
+HULK INTERPRETER es un intérprete del lenguaje HULK: Havana University Lenguage for Kompilers.
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{Introducción}\label{sec;intro}
+
+
+
+\newpage
+\section{¿Cómo usarlo?}
+
+HULK INTERPRETER  es una aplicación de consola, donde el usuario puede introducir una expresión del lenguaje HULK , presionar ENTER, e inmediatamente aparecerá en caso de existir, el resultado de evaluar la expresión. Un ejemplo de interacción es el siguiente:
+
+\begin{lstlisting}[language= Haskell]
+> function fib(x) => if(x == 1 | x == 2) 1 else fib(x -1) + fib(x - 2);  
+> function factorial(x) => if(x == 0) 1 else x*factorial(x-1);  
+> let x = 4 in fib(x+1);
+5
+> let x = 50 in print(x);
+50
+> let a = 7 in if(a % 2 == 0) print("Es par") else print("Es impar");
+Es impar
+\end{lstlisting}
+
+Las líneas que comienza con >   representan las entradas del usuario, las que no comienzan así, son los resultados de las expresiones inmediatamente anteriores.
+\paragraph{\textcolor{red}{En el caso de las dos primeras instrucciones que son declaraciones de funciones, la siguiente línea es otra posible entrada. Otra particularidad es que en caso de que la expresión no tenga un valor de retorno, como en el caso de un llamado a función, se imprime el valor de este llamado a pesar de no existir una instrucción \textcolor{blue}{print}.}}
+
+
+
+\newpage
+\section{Características del lenguaje}\label{sec;base}
+El subcojunto de HULK implementado en este proyecto se compone solamente de expresiones escritas en una sola línea.
+
+\subsection{Expresiones básicas}
+Las instrucciones terminan en ';'. El lenguaje soporta expresiones aritméticas  y funciones matemáticas básicas:
+\begin{lstlisting}[language= Haskell]
+> print( sin(2*PI) ^ 2 + cos( 3*PI /  log(E, E^2)) ); 
+\end{lstlisting}
+ HULK tiene tres tipos básicos: \textcolor{blue}{string}, \textcolor{blue}{number} y \textcolor{blue}{boolean}.
+
+\subsection{Variables}
+La declaración de variables en HULK es posible mediante la expresión \textit{let-in}, que funciona de la siguiente manera:
+\begin{lstlisting}[language= Haskell]
+> let a = PI/3 in print(cos(x));
+0.5
+\end{lstlisting}
+Las expresiones \textit{let-in} pueden incluir la declaración de más de una variable. Consta de un cuerpo luego de la palabra reservada \textit{in}  que puede estar formado por cualquier expresión y utilizar las variables declaradas en el \textit{let}. Fuera de la expresión \textit{let-in} las variables dejan de existir.
+Ejemplo:
+\begin{lstlisting}[language= Haskell]
+> let age = 19, text = "I am " , message = " years old." in print(text @ age @ message);
+I am 19 years old.
+\end{lstlisting}
+Esta expresión es equivalente a:
+\begin{lstlisting}[language= Haskell]
+> let age = 19 in ( let text = "I am " in ( let message = " years old"  in print(text @ age @ message))); 
+\end{lstlisting}
+
+El valor de retorno de una  expresión \textit{let-in} coincide con el valor de retorno de su cuerpo, de ahí que tengan sentido las siguientes expresiones:
+\begin{lstlisting}[language= Haskell]
+> print( 65 + (let x = 2 in x^2));
+69
+> log(E, let x = E^0 in x);
+0
+\end{lstlisting}
+
+
+\subsection{Condicionales}
+Los condicionales son posibles mediante la estrcutura \textit{if-else}, que recibe una expresión booleana entre paréntesis y dos expresiones adicionales, una asociada al \textit{if} y otra al \textit{else}, de este modo la expresión solo es válida si están inlcuidas ambas partes:
+\begin{lstlisting}[language= Haskell]
+> print( if(4>3) "Yes" else "No");
+Yes
+> let a = 657 in if(a % 2 == 0) print("Es par") else print("Es impar");
+Es impar
+\end{lstlisting}
+
+\subsection{Funciones}
+Las funciones \textit{inline} implementadas tienen la siguiente estructura:
+ \begin{lstlisting}[language= Haskell]
+> function tangente(x) => sin(x) / cos(x);
+\end{lstlisting}
+Una vez definida la función, puede ser llamada desde cualquier expresión:
+\begin{lstlisting}[language= Haskell]
+> print( tangente(PI/4) + 5);
+6
+\end{lstlisting}
+El cuerpo de una función \textit{inline} es una expresión cualquiera, que puede incluir otras funciones ya definidas.
+\subsubsection{Recursión}
+El lenguaje presenta por definición soporte para recursión. Un ejemplo de función recursiva es el siguiente:
+\begin{lstlisting}[language= Haskell]
+> function factorial(x) => if(x == 0) 1 else x*factorial(x-1);  
+> factorial(7);
+5040
+\end{lstlisting}
+
+\newpage
+
+
+\section{Errores}
+En HULK hay tres tipos de errores esenciales. Si una expresion tiene alguno, el intérprete imprime una línea con la clasificación del error y una información breve del origen del problema.
+\subsection{Error Léxico}
+En esta categoría entran los errores que se producen por la presencia de tokens inválidos :
+\begin{lstlisting}[language= Haskell]
+> let a45 =9 in print(a45);
+! LEXICAL ERROR: Unexpected token '45'.
+> if ( 6 ? 7 ) print("Valid") else print("Invalid");
+! LEXICAL ERROR: '?' is not valid token.
+\end{lstlisting}
+\subsection{Error Sintáctico}
+\subsection{Error Semántico}
+\subsubsection{Errores propios de funciones}
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+\section{Estructura del proyecto}\label{}
+
+
+\subsection{}\label{}
+
+\subsection{}\label{}
+
+
+\subsubsection{}\label{}
+
+
+
+
+\paragraph{\textcolor{blue}{} }\label{}
+
+
+
+\subsubsection{}\label{}
+
+
+\subsubsection{}\label{}
+
+
+
+
+
+\subsubsection{}\label{}
+
+
+
+
+\newpage
+
+\section{Conclusiones}\label{sec:concl}
+La creación de este proyecto ha sido sumamente instructiva sobre temas como encapsulamiento, modularización, herencia, y polimorfismo por lo que  ha contribuido sólidamente a fortalecer habilidades como la investigación y otras menos interactivas pero igualmente importantes como son la organización y la planificación, tan necesarias para la vida profesional.
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

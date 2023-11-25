@@ -1,5 +1,6 @@
 namespace Hulk.Biblioteca.Tree
 {
+    //Objeto esencial en el proceso de analisis lexico pues cada "simbolo" es convertido en un token de su tipo predefinido
     public sealed class Token : Nodo
     {
         public int Position;

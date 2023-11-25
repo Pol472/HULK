@@ -1,7 +1,7 @@
 using Hulk.Biblioteca.Semantic;
 namespace Hulk.Biblioteca.Tree
 {
-
+    //Aqui son manejados todos los literales
     public sealed class LiteralExpresion : Expresion
     {
         public Token Literal { get; }
@@ -16,6 +16,7 @@ namespace Hulk.Biblioteca.Tree
         {
             Literal = literal;
             Value = value;
+            //Con este swicht clasificamos cada literal en el tipo de dato Hulk correspondiente de acuerdo a su tipo System
             switch(Literal.Type)
             {
                 case TokenType.IdentificadorToken:

@@ -2,7 +2,8 @@ using Hulk.Biblioteca.Semantic;
 
 namespace Hulk.Biblioteca.Tree
 {
-
+    // Este objeto maneja a las expresiones entre parentesis
+ 
     public sealed class ParentesisExpresion : Expresion
     {
         public Token OpenParenToken { get; }

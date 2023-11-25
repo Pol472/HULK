@@ -1,5 +1,6 @@
 namespace Hulk.Biblioteca.Semantic
 {
+    //Clases abstractas del arbol semantico
    internal abstract class Semantic_Nodo
     {
         

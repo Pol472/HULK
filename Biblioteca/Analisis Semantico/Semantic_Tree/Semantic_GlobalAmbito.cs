@@ -3,6 +3,8 @@ using Hulk.Biblioteca.Tree;
 
 namespace Hulk.Biblioteca.Semantic
 {
+    //Objeto final devuelto con los errores del parsing semantico, la expresion con chequeo de tipos
+    //y el contexto de las variables
     internal sealed class Semantic_GlobalAmbito
     {
         public Semantic_GlobalAmbito(Semantic_GlobalAmbito padre, List<Error> errores,

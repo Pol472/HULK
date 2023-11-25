@@ -4,6 +4,7 @@ namespace Hulk.Biblioteca.Parser
 {
     internal static class Prioridad
     {
+        // Metodo para devolver los textos de los tokens predefinidos
         public static string GetText(TokenType tipo)
         {
             switch (tipo)
@@ -82,6 +83,9 @@ namespace Hulk.Biblioteca.Parser
                     return null;
             }
         }
+
+        //Metodo que devuelve la prioridad de los operadores binarios
+        //Llamado desde el parser para evaluar las expresiones binarias
         public static int PrioridadOperadorBinario(this TokenType tipo)
         {
             switch (tipo)
@@ -112,6 +116,8 @@ namespace Hulk.Biblioteca.Parser
                     return 0;
             }
         }
+        //Metodo que devuelve la prioridad de los operadores unarios
+        //Llamado desde el parser para evaluar las expresiones unarias
         public static int PrioridadOperadorUnario(this TokenType tipo)
         {
             switch (tipo)
@@ -125,6 +131,8 @@ namespace Hulk.Biblioteca.Parser
             }
         }
 
+
+        //Metodo que identifica el tipo de palabra clave 
         internal static TokenType KeywordType(string text)
         {
             switch (text)

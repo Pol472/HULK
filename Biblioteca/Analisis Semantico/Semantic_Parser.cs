@@ -3,11 +3,14 @@ using Hulk.Biblioteca.Tree;
 
 namespace Hulk.Biblioteca.Semantic
 {
-
+    //Este objeto tiene como principal funcion chequear si las operaciones 
+    //de la expresion introducida tienen sentido "semantico" en el lenguaje
     internal class Semantic_Parser
     {
+        //Lista de errores 
         private readonly List<Error> errores = new List<Error>();
         
+        //Scope
         private Semantic_Ambito Ambito;
         public Semantic_Parser(Semantic_Ambito padre)
         {
@@ -55,67 +58,10 @@ namespace Hulk.Biblioteca.Semantic
         }
 
 
-
-        private Semantic_Expresion ConectaIfDeclaracion(IFDeclaracionExpresion declaracion)
+          private Semantic_Expresion ConectaExpresion(Expresion expresion)
         {
-            var condicion = ConectaExpresionCondicion(declaracion.Condicion, TipoHulk.Boolean);
-            var cuerpoIf = ConectaExpresion(declaracion.CuerpoIf);
-            var cuerpoElse = (declaracion.CuerpoElse == null) ? null : ConectaExpresion(declaracion.CuerpoElse.CuerpoElse);
-
-            if (cuerpoElse == null)
-                errores.Add(new Error(TipoError.SemanticError, $"Expected else in if-else expresion"));
-
-            return new Semantic_IF_Declaracion(condicion, cuerpoIf, cuerpoElse);
-        }
-
-        private Semantic_Expresion ConectaExpresionCondicion(Expresion expresion, TipoHulk type)
-        {
-            var result = ConectaExpresion(expresion);
-            if (result.TipoHulk != type)
-                errores.Add(new Error(TipoError.SemanticError, $"The conditional expresion in the if statement is not boolean."));
-            return result;
-        }
-
-        private Semantic_Expresion ConectaVariableDeclaracion(VariableDeclaracionExpresion declaracion)
-        {
-            List<Semantic_AsignacionVariable> lista = new List<Semantic_AsignacionVariable>();
-            foreach (var alfa in declaracion.Declaraciones)
-            {
-                string name = alfa.Identificador.Text;
-                var expresion = ConectaExpresion(alfa.Expresion);
-                var variable = new VariableSymbol(name, expresion.GetType(), expresion.TipoHulk);
-                lista.Add(new Semantic_AsignacionVariable(variable, expresion));
-                Ambito = new Semantic_Ambito(Ambito);
-                if (!Ambito.Try_DeclararVariable(variable))
-                {
-                    errores.Add(new Error(TipoError.SemanticError, $"Variable '{name}' has already been declared"));
-                }
-
-            }
-            var contexto = ConectaExpresion(declaracion.Contexto);
-            if (contexto == null)
-                errores.Add(new Error(TipoError.SemanticError, $"Expected a context for variable let-in expresion."));
-
-            Ambito = Ambito.Padre;
-
-            return new Semantic_VariableDeclaracion(lista, contexto);
-        }
-
-        private Semantic_Expresion ConectaDeclaracionExpresion(DeclaracionExpresion declaracion)
-        {
-            var expresion = ConectaExpresion(declaracion.Expresion);
-            return new Semantic_DeclaracionExpresion(expresion);
-
-        }
-
-
-        private Semantic_Expresion ConectaParentesisExpresion(ParentesisExpresion expresion)
-        {
-            return ConectaExpresion(expresion.Expresion);
-        }
-
-        private Semantic_Expresion ConectaExpresion(Expresion expresion)
-        {
+            //Clasifica la expresion obtenida del parser de acuerdo su tipo y la envia
+            //a chequear al metodo correspondiente
             switch (expresion.Type)
             {
                 case TokenType.ParentesisExpresion:
@@ -145,9 +91,73 @@ namespace Hulk.Biblioteca.Semantic
             }
         }
 
+
+
+        //Expresion if-else
+        private Semantic_Expresion ConectaIfDeclaracion(IFDeclaracionExpresion declaracion)
+        {
+            var condicion = ConectaExpresionCondicion(declaracion.Condicion, TipoHulk.Boolean);
+            var cuerpoIf = ConectaExpresion(declaracion.CuerpoIf);
+            var cuerpoElse = (declaracion.CuerpoElse == null) ? null : ConectaExpresion(declaracion.CuerpoElse.CuerpoElse);
+
+            if (cuerpoElse == null)
+                errores.Add(new Error(TipoError.SemanticError, $"Expected else in if-else expresion"));
+
+            return new Semantic_IF_Declaracion(condicion, cuerpoIf, cuerpoElse);
+        }
+        //Metodo para chequear la expresion condicional del if
+        private Semantic_Expresion ConectaExpresionCondicion(Expresion expresion, TipoHulk type)
+        {
+            var result = ConectaExpresion(expresion);
+            if (result.TipoHulk != type)
+                errores.Add(new Error(TipoError.SemanticError, $"The conditional expresion in the if statement is not boolean."));
+            return result;
+        }
+
+
+        //Expresion Let-in
+        private Semantic_Expresion ConectaVariableDeclaracion(VariableDeclaracionExpresion declaracion)
+        {
+            List<Semantic_AsignacionVariable> lista = new List<Semantic_AsignacionVariable>();
+            //Declaracion de las variables previas al in
+            foreach (var alfa in declaracion.Declaraciones)
+            {
+                string name = alfa.Identificador.Text;
+                var expresion = ConectaExpresion(alfa.Expresion);
+                var variable = new VariableSymbol(name, expresion.GetType(), expresion.TipoHulk);
+                lista.Add(new Semantic_AsignacionVariable(variable, expresion));
+                Ambito = new Semantic_Ambito(Ambito);
+                if (!Ambito.Try_DeclararVariable(variable))
+                {
+                    errores.Add(new Error(TipoError.SemanticError, $"Variable '{name}' has already been declared"));
+                }
+
+            }
+            //Chquear el contexto
+            var contexto = ConectaExpresion(declaracion.Contexto);
+            if (contexto == null)
+                errores.Add(new Error(TipoError.SemanticError, $"Expected a context for variable let-in expresion."));
+            
+            Ambito = Ambito.Padre;
+
+            return new Semantic_VariableDeclaracion(lista, contexto);
+        }
+
+        private Semantic_Expresion ConectaDeclaracionExpresion(DeclaracionExpresion declaracion)
+        {
+            var expresion = ConectaExpresion(declaracion.Expresion);
+            return new Semantic_DeclaracionExpresion(expresion);
+
+        }
+          
+     
+        //LLamadas a funciones
         private Semantic_Expresion ConectaFuncionCall(FuncionCallExpresion expresion)
         {
+
             var nombre = expresion.Identificador.Text;
+            //Se verifica si la llamada es a una funcion propia de HULK o alguna definida por le usuario
+            //en el primer caso se llama al correspondiente metodo de analisis
             switch (nombre)
             {
                 case "sen":
@@ -162,16 +172,19 @@ namespace Hulk.Biblioteca.Semantic
                     int cant = expresion.Argumentos.Count;
                     List<Semantic_Expresion> argumentos = new List<Semantic_Expresion>();
                     FuncionSymbol simbolo = new FuncionSymbol(nombre, cant);
+                    // Se verifica la existencia de la funcion en el diccionario
                     if (!Hulk.Program.funciones.ContainsKey(simbolo.Name))
                     {
                         errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with {cant} parameters do not exist."));
                         return null;
                     }
+                    //Se verifica que coincida el numero de parametros con el de argumentos de la llamada
                     if(Hulk.Program.funciones[simbolo.Name].Parametros.Count != expresion.Argumentos.Count)
                     {
                         errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with {cant} parameters do not exist."));
                         return null;
                     }
+                    //Se chequean todos los argumentos de la llamada
                     foreach(var a in expresion.Argumentos)
                     {
                         var semantic = ConectaExpresion(a);
@@ -182,6 +195,7 @@ namespace Hulk.Biblioteca.Semantic
             }
         }
 
+        //Llamada a funcion raiz cuadrada
         private Semantic_Expresion ConectaSqrtExpresion(FuncionCallExpresion expresion)
         {
             int argumentos = expresion.Argumentos.Count;
@@ -198,7 +212,7 @@ namespace Hulk.Biblioteca.Semantic
         }
 
 
-
+        //Llamada a funcion logaritmo
         private Semantic_Expresion ConectaLogaritmoExpresion(FuncionCallExpresion expresion)
         {
             int argumentos = expresion.Argumentos.Count;
@@ -226,7 +240,7 @@ namespace Hulk.Biblioteca.Semantic
 
             return new Semantic_LogExpresion(baseLog, argumento);
         }
-
+        //LLamada a funcion coseno
         private Semantic_Expresion ConectaCosenoExpresion(FuncionCallExpresion expresion)
         {
             int argumentos = expresion.Argumentos.Count;
@@ -242,6 +256,7 @@ namespace Hulk.Biblioteca.Semantic
             return new Semantic_CosExpresion(argumento);
         }
 
+        //LLamada a funcion seno
         private Semantic_Expresion ConectaSenoExpresion(FuncionCallExpresion expresion)
         {
             int argumentos = expresion.Argumentos.Count;
@@ -255,22 +270,21 @@ namespace Hulk.Biblioteca.Semantic
                 errores.Add(new Error(TipoError.SemanticError, $"'{argumento.TipoHulk}' is not a valid argument for seno."));
             return new Semantic_SenExpresion(argumento);
         }
-
+         
+        //LLamada a funcion print
         private Semantic_Expresion ConectaPrintExpresion(PrintExpresion expresion)
         {
             var impresion = ConectaExpresion(expresion.Expresion);
             return new Semantic_PrintExpresion(impresion);
         }
 
-        private Semantic_Expresion ConectaLiteralExpresion(LiteralExpresion expresion)
-        {
-            var value = expresion.Value ?? 0;
-            return new Semantic_LiteralExpresion(value);
-        }
 
+        //Chequeo de expresiones unarias
         private Semantic_Expresion ConectaUnaryExpresion(UnaryExpresion expresion)
         {
             var Operando = ConectaExpresion(expresion.Operando);
+             
+             //Aqui se verifica la compatibilidad entre el operando y el operador
             var Operador = Semantic_UnaryOperador.Semantic_Parse_UO(expresion.Operador.Type, Operando.TipoHulk);
             if (Operador == null)
             {
@@ -280,11 +294,13 @@ namespace Hulk.Biblioteca.Semantic
             return new Semantic_UnaryExpresion(Operador, Operando);
         }
 
+        //Chequeo de expresiones binarias
         private Semantic_Expresion ConectaBinaryExpresion(BinaryExpresion expresion)
         {
             var left = ConectaExpresion(expresion.Left);
 
             var rigth = ConectaExpresion(expresion.Rigth);
+            //Aqui se verifica la compatibilidad entre los operandos y el operador
             var operador = Semantic_BinaryOperador.Semantic_Parse_BO(expresion.Operador.Type, left.TipoHulk, rigth.TipoHulk);
 
             if (operador == null)
@@ -294,6 +310,8 @@ namespace Hulk.Biblioteca.Semantic
             }
             return new Semantic_BinaryExpresion(left, operador, rigth);
         }
+        
+        //Chequea las asignaciones de variables
 
         private Semantic_Expresion ConectaAsignacionVariableExpresion(AsignacionVariableExpresion expresion)
         {
@@ -316,7 +334,21 @@ namespace Hulk.Biblioteca.Semantic
             return new Semantic_AsignacionVariable(variable, semantic_Expresion);
 
         }
+           
+        //Chequea las expresiones entre parentesis
+        private Semantic_Expresion ConectaParentesisExpresion(ParentesisExpresion expresion)
+        {
+            return ConectaExpresion(expresion.Expresion);
+        }
+        
+        //Chqueo de expresiones literales
+        private Semantic_Expresion ConectaLiteralExpresion(LiteralExpresion expresion)
+        {
+            var value = expresion.Value ?? 0;
+            return new Semantic_LiteralExpresion(value);
+        }
 
+        //Cheque las expresiones que llaman a variables
         private Semantic_Expresion ConectaIDExpresion(IDExpresion expresion)
         {
             string nombre = expresion.Identificador.Text;

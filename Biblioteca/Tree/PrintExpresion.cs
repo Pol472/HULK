@@ -2,6 +2,7 @@ using Hulk.Biblioteca.Semantic;
 
 namespace Hulk.Biblioteca.Tree
 {
+    //Objeto que caracteriza a las expresiones print
     public class PrintExpresion : Expresion
     {
         public PrintExpresion(Token printKeyword, ParentesisExpresion expresion)

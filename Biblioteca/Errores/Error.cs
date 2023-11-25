@@ -1,5 +1,6 @@
 namespace Hulk.Biblioteca.Errores
 {
+    //Clase Error , para crear los objetos de tipo error en Hulk
     public sealed class Error
     {
         public TipoError Tipo { get; }
@@ -30,6 +31,7 @@ namespace Hulk.Biblioteca.Errores
         }
        
     }
+    //Tipos de errores
     public enum TipoError
     {
         SintacticError,

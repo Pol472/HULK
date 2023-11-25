@@ -1,5 +1,7 @@
 namespace Hulk.Biblioteca.Tree
 {
+    // En el enum estan presentes, todos los tipos de tokens conocidos por el lenguaje, y de manera especial
+    // un tipo para las expresiones , usado a la hora de relacionarlas entre si
     public enum TokenType
     {
         //Especial Tokens
@@ -11,8 +13,7 @@ namespace Hulk.Biblioteca.Tree
         Cierre,
         IgualAsignador,
         Coma,
-        OpenBrace,
-        CloseBrace,
+    
 
         //KeyWords
         TrueKeyWord,
@@ -89,17 +90,5 @@ namespace Hulk.Biblioteca.Tree
         Flecha,
         SqrtKeyWord,
     }
-    public enum TiposPrimitivosHulk
-    {
-        String,
-        Number,
-        Boolean,
-        Identificador,
-        LetInExpresion,
-        ElseExpresion,
-        IfExpresion,
-        BloqueExpresion,
-        MultipleAsignacion,
-        FuncionCall,
-    }
+   
 }

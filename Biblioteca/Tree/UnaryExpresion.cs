@@ -2,6 +2,7 @@ using Hulk.Biblioteca.Semantic;
 
 namespace Hulk.Biblioteca.Tree
 {
+    //Esta clase caracteriza a todas las expresiones modificadas por un operador unario
     public sealed class UnaryExpresion : Expresion
     {
         public Token Operador { get; }

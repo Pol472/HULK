@@ -6,10 +6,17 @@ namespace Hulk.Biblioteca.Parser
 {
     public sealed class Parser
     {
-        
+        //Array de Token proveniente del lexer
         private readonly Token[] tokens;
+
+        //Posicion actual del array 
         private int position;
+
+        //Lista de Errores
         private List<Error> errores = new List<Error>();
+
+        //Diccionario para guardar las funciones declaradas inline
+        public static Dictionary<string, FuncionDeclaracion> Funciones = new Dictionary<string, FuncionDeclaracion>();
         public Parser(string text)
         {
             var tokensList = new List<Token>();
@@ -28,11 +35,74 @@ namespace Hulk.Biblioteca.Parser
             tokens = tokensList.ToArray();
 
             errores.AddRange(Lexer.Errores);
-           
+
         }
-        public IEnumerable<Error> Errores => errores;
+        //Metodo central
+        public SyntaxTree Analiza()
+        {
+            if (tokens.Length == 1)
+                return null;
+
+            var declaracion = AnalizaExpresion();
+            var finLinea = Coincidencia(TokenType.EndOfLine);
+            return new SyntaxTree(errores, declaracion, finLinea);
+        }
+        //Metodo para identificar el posible tipo de expresion actual
+        private Expresion AnalizaExpresionBase()
+        {
+            switch (Actual.Type)
+            {
+                //Constante E
+                case TokenType.Euler:
+                    return ParseEuler();
+                //Constante PI
+                case TokenType.PI:
+                    return ParsePI();
+                //Declaracion de funciones
+                case TokenType.FuncionKeyWord:
+                    return AnalizaFuncionDeclaracion();
+                //Expresion Let-in
+                case TokenType.LetKeyWord:
+                    return AnalizaExpresionLet();
+                //Expresion if-else
+                case TokenType.IfKeyWord:
+                    return AnalizaExpresionIf();
+                //Llamada a funcion print
+                case TokenType.PrintKeyWord:
+                    return AnalizaPrintExpresion();
+                //Expresiones entre parentesis
+                case TokenType.OpenParenToken:
+                    return ParseParentesisExpresion();
 
 
+                //Literales
+                //Booleanos
+                case TokenType.TrueKeyWord:
+                case TokenType.FalseKeyWord:
+                    return ParseBooleanExpresion();
+                //Numeros
+                case TokenType.NumberToken:
+                    return ParseNumberExpresion();
+                //String
+                case TokenType.StringToken:
+                    return ParseStringExpresion();
+
+                //Funciones matematicas predefinidas
+                case TokenType.SenKeyWord:
+                case TokenType.CosKeyWord:
+                case TokenType.LogKeyWord:
+                case TokenType.SqrtKeyWord:
+                //Identificador
+                case TokenType.IdentificadorToken:
+                    return ParseIDorFuncionCallExpresion();
+                default:
+                    return ParseIDExpresion();
+            }
+
+        }
+
+
+        //Parsing de expresiones binarias
         private Expresion AnalizaPrioridad(int padrePrioridad = 0)
         {
             Expresion left;
@@ -65,15 +135,7 @@ namespace Hulk.Biblioteca.Parser
         {
             return AnalizaAsignacion();
         }
-        public SyntaxTree Analiza()
-        {
-            if (tokens.Length == 1)
-                return null;
 
-            var declaracion = AnalizaExpresion();
-            var finLinea = Coincidencia(TokenType.EndOfLine);
-            return new SyntaxTree(errores, declaracion, finLinea);
-        }
         private Expresion AnalizaExpresion()
         {
             switch (Actual.Type)
@@ -91,6 +153,8 @@ namespace Hulk.Biblioteca.Parser
             }
         }
 
+        //Metodo para parsear declaracion de funcion
+
         private Expresion AnalizaFuncionDeclaracion()
         {
             Token funcionKeyWord = Coincidencia(TokenType.FuncionKeyWord);
@@ -98,38 +162,42 @@ namespace Hulk.Biblioteca.Parser
             var parametros = ParseParametros();
             Token retornador = Coincidencia(TokenType.Flecha);
             Expresion cuerpo = AnalizaExpresion();
-            
-            var funcionsymbol = new FuncionSymbol(nombre.Text,parametros.Count);
-            if(Funciones.ContainsKey(funcionsymbol.Name))
-             errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with the same number of parameters and the same type of result already exist."));
+
+            var funcionsymbol = new FuncionSymbol(nombre.Text, parametros.Count);
+            if (Funciones.ContainsKey(funcionsymbol.Name))
+                errores.Add(new Error(TipoError.FuncionError, $"Function '{nombre}' with the same number of parameters and the same type of result already exist."));
             else
-            Funciones.Add(funcionsymbol.Name,new FuncionDeclaracion(funcionKeyWord, nombre, parametros, retornador, cuerpo));
-        
+                Funciones.Add(funcionsymbol.Name, new FuncionDeclaracion(funcionKeyWord, nombre, parametros, retornador, cuerpo));
+
             return null;
         }
+        //Metodo auxiliar para parsear los parametros de una funcion
 
         private List<Token> ParseParametros()
         {
             Coincidencia(TokenType.OpenParenToken);
             List<Token> parametros = new List<Token>();
-            if(Actual.Type != TokenType.CloseParenToken){
-            while(Actual.Type != TokenType.CloseParenToken)
+            if (Actual.Type != TokenType.CloseParenToken)
             {
-
-                var ident = Coincidencia(TokenType.IdentificadorToken);
-                if (parametros.Contains(ident))
+                while (Actual.Type != TokenType.CloseParenToken)
                 {
-                    errores.Add(new Error(TipoError.SintacticError, $"Function declaration already has a parameter with the name '{ident.Text}'."));
+
+                    var ident = Coincidencia(TokenType.IdentificadorToken);
+                    if (parametros.Contains(ident))
+                    {
+                        errores.Add(new Error(TipoError.SintacticError, $"Function declaration already has a parameter with the name '{ident.Text}'."));
+                    }
+                    else
+                        parametros.Add(ident);
+                    if (Actual.Type == TokenType.Coma)
+                        Coincidencia(TokenType.Coma);
                 }
-                else
-                    parametros.Add(ident);
-                if(Actual.Type == TokenType.Coma)
-                Coincidencia(TokenType.Coma);
-            }
             }
             Coincidencia(TokenType.CloseParenToken);
             return parametros;
         }
+
+        //Metodos para parsear expresion if-else
 
         private DeclaracionNodo AnalizaExpresionIf()
         {
@@ -150,19 +218,22 @@ namespace Hulk.Biblioteca.Parser
             return new ElseDeclaracion(elseKeyWord, cuerpo);
         }
 
+
+        //Metodo para parsear expresion let-in
         private VariableDeclaracionExpresion AnalizaExpresionLet()
         {
             var Keyword = Coincidencia(TokenType.LetKeyWord);
 
             List<AsignacionVariableExpresion> lista = new List<AsignacionVariableExpresion>();
+            //Este bucle es para garantizar que se manejan las expresiones let con mas de una variable
             while (Actual.Type != TokenType.InKeyWord)
             {
                 var identificador = Coincidencia(TokenType.IdentificadorToken);
                 var asignador = Coincidencia(TokenType.IgualAsignador);
                 var expresion = AnalizaExpresion();
                 lista.Add(new AsignacionVariableExpresion(identificador, asignador, expresion));
-                if(Actual.Type == TokenType.Coma)
-                NextToken();
+                if (Actual.Type == TokenType.Coma)
+                    NextToken();
             }
 
             var InKeyWord = Coincidencia(TokenType.InKeyWord);
@@ -170,135 +241,7 @@ namespace Hulk.Biblioteca.Parser
             return new VariableDeclaracionExpresion(Keyword, lista, InKeyWord, Contexto);
         }
 
-        private Expresion AnalizaDeclaracionExpresion()
-        {
-            var expresion = AnalizaExpresionSecundaria();
-            return new DeclaracionExpresion(expresion);
-        }
-
-
-
-        private Expresion AnalizaExpresionBase()
-        {
-            switch (Actual.Type)
-            {
-                case TokenType.Euler:
-                    return ParseEuler();
-                case TokenType.PI:
-                    return ParsePI();
-                case TokenType.FuncionKeyWord:
-                    return AnalizaFuncionDeclaracion();
-                case TokenType.LetKeyWord:
-                    return AnalizaExpresionLet();
-                case TokenType.IfKeyWord:
-                    return AnalizaExpresionIf();
-                case TokenType.PrintKeyWord:
-                    return AnalizaPrintExpresion();
-                case TokenType.OpenParenToken:
-                    return ParseParentesisExpresion();
-                case TokenType.TrueKeyWord:
-                case TokenType.FalseKeyWord:
-                    return ParseBooleanExpresion();
-                case TokenType.NumberToken:
-                    return ParseNumberExpresion();
-                case TokenType.StringToken:
-                    return ParseStringExpresion();
-                case TokenType.SenKeyWord:
-                case TokenType.CosKeyWord:
-                case TokenType.LogKeyWord:
-                case TokenType.SqrtKeyWord:
-                case TokenType.IdentificadorToken:
-                    return ParseIDorFuncionCallExpresion();
-                default:
-                    return ParseIDExpresion();
-            }
-
-        }
-
-        private Expresion ParseIDorFuncionCallExpresion()
-        {
-
-            if ((Actual.Type == TokenType.IdentificadorToken 
-            ||Actual.Type == TokenType.SenKeyWord || Actual.Type == TokenType.CosKeyWord ||
-            Actual.Type == TokenType.LogKeyWord || Actual.Type == TokenType.SqrtKeyWord)
-            && Take(1).Type == TokenType.OpenParenToken)
-                return ParseFuncionCallExpresion();
-
-            return ParseIDExpresion();
-        }
-
-        private Expresion ParseFuncionCallExpresion()
-        {
-
-            var ident = Actual;
-            NextToken();
-            List<Expresion> parametros = new List<Expresion>();
-            Coincidencia(TokenType.OpenParenToken);
-            while(Actual.Type != TokenType.CloseParenToken)
-            {
-                var argumento = AnalizaExpresion();
-                parametros.Add(argumento);
-                if(Actual.Type == TokenType.Coma)
-                NextToken();
-            }
-            Coincidencia(TokenType.CloseParenToken);
-            return new FuncionCallExpresion(ident, parametros);
-        }
-
-        private Expresion ParsePI()
-        {
-            var pi = Coincidencia(TokenType.PI);
-            return new LiteralExpresion(pi, Math.PI);
-        }
-
-        private Expresion ParseEuler()
-        {
-            var euler = Coincidencia(TokenType.Euler);
-            return new LiteralExpresion(euler, Math.E);
-        }
-
-        
-        private Expresion AnalizaPrintExpresion()
-        {
-            var printKeyword = Coincidencia(TokenType.PrintKeyWord);
-            var expresion = ParseParentesisExpresion();
-            return new PrintExpresion(printKeyword, expresion);
-        }
-
-        private Expresion ParseStringExpresion()
-        {
-            var a = Coincidencia(TokenType.StringToken);
-            return new LiteralExpresion(a);
-        }
-
-        private Expresion ParseNumberExpresion()
-        {
-            var num = Coincidencia(TokenType.NumberToken);
-            return new LiteralExpresion(num);
-        }
-
-        private ParentesisExpresion ParseParentesisExpresion()
-        {
-            var left = Coincidencia(TokenType.OpenParenToken);
-            var expresion = AnalizaExpresion();
-            var rigth = Coincidencia(TokenType.CloseParenToken);
-
-            return new ParentesisExpresion(left, expresion, rigth);
-        }
-
-        private Expresion ParseBooleanExpresion()
-        {
-            var keyword = NextToken();
-            var value = keyword.Type == TokenType.TrueKeyWord;
-            return new LiteralExpresion(keyword, value);
-        }
-
-        private Expresion ParseIDExpresion()
-        {
-            Token identificador = Coincidencia(TokenType.IdentificadorToken);
-            return new IDExpresion(identificador);
-        }
-
+        //Metodo auxiliar para expresiones let-in, asignaciones
         public Expresion AnalizaAsignacion()
         {
 
@@ -313,11 +256,114 @@ namespace Hulk.Biblioteca.Parser
         }
 
 
+        private Expresion AnalizaDeclaracionExpresion()
+        {
+            var expresion = AnalizaExpresionSecundaria();
+            return new DeclaracionExpresion(expresion);
+        }
 
+
+
+
+        private Expresion ParseIDorFuncionCallExpresion()
+        {
+
+            if ((Actual.Type == TokenType.IdentificadorToken
+            || Actual.Type == TokenType.SenKeyWord || Actual.Type == TokenType.CosKeyWord ||
+            Actual.Type == TokenType.LogKeyWord || Actual.Type == TokenType.SqrtKeyWord)
+            && Take(1).Type == TokenType.OpenParenToken)
+                return ParseFuncionCallExpresion();
+
+            return ParseIDExpresion();
+        }
+
+        //Metodo para parsear llamadas a funciones
+
+        private Expresion ParseFuncionCallExpresion()
+        {
+
+            var ident = Actual;
+            NextToken();
+            List<Expresion> parametros = new List<Expresion>();
+            Coincidencia(TokenType.OpenParenToken);
+            while (Actual.Type != TokenType.CloseParenToken)
+            {
+                var argumento = AnalizaExpresion();
+                parametros.Add(argumento);
+                if (Actual.Type == TokenType.Coma)
+                    NextToken();
+            }
+            Coincidencia(TokenType.CloseParenToken);
+            return new FuncionCallExpresion(ident, parametros);
+        }
+
+        //Metodos para parsear las constantes
+
+        private Expresion ParsePI()
+        {
+            var pi = Coincidencia(TokenType.PI);
+            return new LiteralExpresion(pi, Math.PI);
+        }
+
+        private Expresion ParseEuler()
+        {
+            var euler = Coincidencia(TokenType.Euler);
+            return new LiteralExpresion(euler, Math.E);
+        }
+
+        //Metodo para parsear la llamada a print
+        private Expresion AnalizaPrintExpresion()
+        {
+            var printKeyword = Coincidencia(TokenType.PrintKeyWord);
+            var expresion = ParseParentesisExpresion();
+            return new PrintExpresion(printKeyword, expresion);
+        }
+
+        //Metodos para parsear literales
+        //String
+
+        private Expresion ParseStringExpresion()
+        {
+            var a = Coincidencia(TokenType.StringToken);
+            return new LiteralExpresion(a);
+        }
+        //Number
+        private Expresion ParseNumberExpresion()
+        {
+            var num = Coincidencia(TokenType.NumberToken);
+            return new LiteralExpresion(num);
+        }
+        //Boolean
+           private Expresion ParseBooleanExpresion()
+        {
+            var keyword = NextToken();
+            var value = keyword.Type == TokenType.TrueKeyWord;
+            return new LiteralExpresion(keyword, value);
+        }
+
+        //Metodo para parsear expresiones entre parentesis
+        private ParentesisExpresion ParseParentesisExpresion()
+        {
+            var left = Coincidencia(TokenType.OpenParenToken);
+            var expresion = AnalizaExpresion();
+            var rigth = Coincidencia(TokenType.CloseParenToken);
+
+            return new ParentesisExpresion(left, expresion, rigth);
+        }
+
+     
+        //Metodo para devolver un identificador(ya parseado)
+        private Expresion ParseIDExpresion()
+        {
+            Token identificador = Coincidencia(TokenType.IdentificadorToken);
+            return new IDExpresion(identificador);
+        }
+
+        
+
+
+        //Metodos para moverse sobre el array de tokens
         private Token Actual => Take(0);
-
-        public static Dictionary<string, FuncionDeclaracion> Funciones = new Dictionary<string, FuncionDeclaracion>();
-
         private Token Take(int count)
         {
             var index = position + count;
@@ -326,6 +372,14 @@ namespace Hulk.Biblioteca.Parser
 
             return tokens[index];
         }
+        private Token NextToken()
+        {
+            var actual = Actual;
+            position++;
+            return actual;
+        }
+
+        //Metodo para contrastar si el token actual era el esperado(matching)
         private Token Coincidencia(TokenType tipo)
         {
             if (Actual.Type == tipo)
@@ -338,12 +392,6 @@ namespace Hulk.Biblioteca.Parser
 
 
 
-        private Token NextToken()
-        {
-            var actual = Actual;
-            position++;
-            return actual;
-        }
 
     }
 }

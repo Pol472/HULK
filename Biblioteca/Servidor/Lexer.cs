@@ -8,17 +8,22 @@ namespace Hulk.Biblioteca
 {
     internal sealed class Lexer
     {
+        //Lista de errores 
         private readonly List<Error> errores = new List<Error>();
+        //Texto de la linea a tokenizar
         private readonly string text;
+        //Posicion actual del texto  y  otras propiedades de los tokens devueltos
         private int position;
         private int inicio;
         private TokenType Tipo;
+
         private object Valor;
 
         public Lexer(string texto)
         {
             text = texto;
         }
+        //metodo geter de la lista de errores
         public IEnumerable<Error> Errores => errores;
 
 

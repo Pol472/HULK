@@ -2,7 +2,7 @@ using Hulk.Biblioteca.Semantic;
 
 namespace Hulk.Biblioteca.Tree
 {
-    
+    //Clase de las expresiones let-in
     public sealed class VariableDeclaracionExpresion : DeclaracionNodo
     {
         public VariableDeclaracionExpresion(Token letKeyWord, List<AsignacionVariableExpresion> declaraciones, Token inKeyWord, Expresion contexto)

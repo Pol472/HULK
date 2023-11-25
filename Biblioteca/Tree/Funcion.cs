@@ -2,9 +2,12 @@ using Hulk.Biblioteca.Semantic;
 
 namespace Hulk.Biblioteca.Tree
 {
+    //clase que maneja los objetos de tipo llamada a funcion 
     public sealed class FuncionCallExpresion : Expresion
     {
         public Token Identificador { get; }
+        // Dado que una llamada a funcion puede contener como argumentos cualquier tipo de expresion
+        // la lista tiene al tipo "generico" Expresion 
         public List<Expresion> Argumentos { get; }
 
         public FuncionCallExpresion(Token identificador, List<Expresion> argumentos)
@@ -17,7 +20,7 @@ namespace Hulk.Biblioteca.Tree
 
         public override TokenType Type => TokenType.CallFuncion;
     }
-
+    // Esta clase maneja las declaraciones de funciones
     public sealed class FuncionDeclaracion : Expresion
     {
         public Token FuncionKeyWord { get; }

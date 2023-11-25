@@ -4,9 +4,10 @@ namespace Hulk.Biblioteca.Tree
 {
     public abstract class DeclaracionNodo : Expresion
     {
-
+        
     }
    
+     //Aqui se manejan las declaraciones 
 
     public sealed class DeclaracionExpresion : DeclaracionNodo
     {
@@ -22,7 +23,7 @@ namespace Hulk.Biblioteca.Tree
         public override TipoHulk TipoDato => Expresion.TipoDato;
     }
 
-
+    //Objeto de tipo if 
     public sealed class IFDeclaracionExpresion : DeclaracionNodo
     {
         public IFDeclaracionExpresion(Token ifKeyWord, Expresion condicion, Expresion cuerpoIf,
@@ -44,7 +45,7 @@ namespace Hulk.Biblioteca.Tree
         public override TipoHulk TipoDato => TipoHulk.Void;
     }
 
-
+    //Objeto de tipo else
     public sealed class ElseDeclaracion : DeclaracionNodo
     {
         public ElseDeclaracion(Token elseKeyWord, Expresion cuerpoElse)
@@ -54,7 +55,7 @@ namespace Hulk.Biblioteca.Tree
         }
 
         public override TokenType Type => TokenType.ElseDeclaracion;
-
+   
         public Token ElseKeyWord { get; }
         public Expresion CuerpoElse { get; }
 

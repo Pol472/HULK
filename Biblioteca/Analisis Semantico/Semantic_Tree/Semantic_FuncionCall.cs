@@ -1,5 +1,6 @@
 namespace Hulk.Biblioteca.Semantic
 {
+    //Objeto semantico llamada a funcion
     internal class Semantic_FuncionCall : Semantic_Declaracion
     {
         public Semantic_FuncionCall(FuncionSymbol simbolo,List<Semantic_Expresion> argumentos)
