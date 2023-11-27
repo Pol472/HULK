@@ -8,6 +8,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
 
 
 
@@ -68,7 +70,13 @@ HULK INTERPRETER es un intérprete del lenguaje HULK: Havana University Lenguage
 \newpage
 
 \section{Introducción}\label{sec;intro}
+El presente informe tiene como objetivo presentar el desarrollo y la implementación del proyecto HULK Interpreter, una aplicación de consola que permite a los usuarios interactuar con el lenguaje de programación HULK. Aunque el lenguaje es más complejo solo se ha implentado la interpretación  para expresiones de una sola línea, ofreciendo soporte para operaciones aritméticas, funciones matemáticas básicas, manipulación de variables, expresiones condicionales, y definición y utilización de funciones.
 
+A lo largo de este informe, se detallarán las características esenciales del lenguaje HULK, su estructura de sintaxis y semántica, así como la funcionalidad del intérprete en el proceso de análisis y evaluación de las expresiones proporcionadas por el usuario.
+
+Además, se explorará la arquitectura del sistema, describiendo los objetos esenciales, como el Lexer, el Parser, el Semantic\_Parser y el Evaluator, así como su influencia en el análisis de las expresiones introducidas por el usuario.
+
+El informe presentará una visión general de las capacidades del lenguaje HULK, sus tipos de datos básicos, manejo de variables, construcciones condicionales, funciones y la capacidad de recursión. Además, se abordarán los distintos tipos de errores presentes en el lenguaje y cómo el intérprete los maneja.
 
 
 \newpage
@@ -163,7 +171,7 @@ El lenguaje presenta por definición soporte para recursión. Un ejemplo de func
 \section{Errores}
 En HULK hay tres tipos de errores esenciales. Si una expresion tiene alguno, el intérprete imprime una línea con la clasificación del error y una información breve del origen del problema.
 \subsection{Error Léxico}
-En esta categoría entran los errores que se producen por la presencia de tokens inválidos :
+En esta categoría entran los errores que se producen por la presencia de tokens inválidos:
 \begin{lstlisting}[language= Haskell]
 > let a45 =9 in print(a45);
 ! LEXICAL ERROR: Unexpected token '45'.
@@ -171,47 +179,176 @@ En esta categoría entran los errores que se producen por la presencia de tokens
 ! LEXICAL ERROR: '?' is not valid token.
 \end{lstlisting}
 \subsection{Error Sintáctico}
+A esta categoría pertenecen los errores producidos por paréntesis balanceados, ausencia de ';' al final de la expresión y expresiones incompletas.
+\begin{lstlisting}[language= Haskell]
+> print("Hola")
+! SYNTAX ERROR: Missing ';' after the declaration.
+> print("Hola);
+! SYNTAX ERROR: String interrupted: 'Hola);'.
+
+\end{lstlisting}
+
 \subsection{Error Semántico}
+Errores producidos por uso incorrecto de los tipos y argumentos. Por ejemplo:
+\begin{lstlisting}[language= Haskell]
+> let a = 8 in print(a+"Hola");
+! SEMANTIC ERROR: Operator '+' cannot be used between 'Number' and 'String'.
+> let x = (let y = 8 in y) in y;
+! SEMANTIC ERROR: 'y' does not exist in the current context.
+> print(sen("Hola"));
+! SEMANTIC ERROR: 'String' is not a valid argument for seno.
+\end{lstlisting}
+
 \subsubsection{Errores propios de funciones}
-
-
-
-
-
-
-
+Este tipo de error recoge a los errores producidos por desbordamiento en llamadas a funciones recursivas definidas por el usuario;
+Ejemplo:
+\begin{lstlisting}[language= Haskell]
+> function factorial(x) => if(x == 0) 1 else x*factorial(x);
+>print( factorial(-2));
+! FUNCTION ERROR: Stack overflow.
+\end{lstlisting}
 
 
 
 
 \newpage
 \section{Estructura del proyecto}\label{}
+El proyecto es una aplicación de consola que sustenta su funcionamiento en el espacio de nombres Hulk.Biblioteca, donde se encuentran todos los objetos y funcionalidades necesarios para el procesamiento(interpretación) de las entradas del usuario.
 
-
-\subsection{}\label{}
-
-\subsection{}\label{}
-
-
-\subsubsection{}\label{}
+\subsection{Flujo del programa}\label{}
+El flujo del programa está dirigido por el método \textit{static} Main de la clase Program perteneciente al namespace Hulk. Mediante una estructura de control de flujo \textit{while} se garantiza que el programa se ejecute mientras que el usuario introduzca cadenas de texto, sin importar si son instrucciones válidas del lenguaje o no. Una vez recepcionada la entrada comienza el proceso de análisis de la expresión, con la inicialización de un objeto de tipo \textit{\textcolor{blue}{SyntaxTree}}, cuya función principal es dirirgir el análisis sintáctico(efectuado gracias a la clase Parser). En este punto, si la expresión introducida es una declaración de función válida, se añade la misma a una colección \textit{\textcolor{blue}{Dictionary$<\textcolor{magenta}{string}, FuncionDeclaracion>$} } en ámbito de  clase de la propia clase Program y se da paso a otra iteración del bucle. Una vez procesada la entrada y clasificadas las expresiones en objetos de \textcolor{blue}{Hulk.Biblioteca.Tree}, si no se detectó ningún error se inicializa un objeto de tipo  \textit{\textcolor{blue}{Servidor}}, de lo contrario se imprimirá el primero de los errores encontrados y continua la ejecución del programa a la espera de otra entrada. Este objeto \textit{\textcolor{blue}{Servidor}} tiene una función análoga al de tipo  \textit{\textcolor{blue}{SyntaxTree}}, con la diferencia de que en lugar de dirigir el análisis sintáctico, dirige el análisis semántico, enfocado esencialmente en chequear los tipos empleados en las expresiones y el sentido que tienen en el lenguaje, todo esto gracias a los objetos del \textit{namespace} \textcolor{blue}{Hulk.Biblioteca.Semantic}. De igual forma si algún error es detectado, se imprime y continua la interacción. Posterior al análisis semántico se crea un objeto de tipo  \textit{\textcolor{blue}{Retorno}} que tiene como propiedad a Value de tipo  \textit{\textcolor{magenta}{object}}, que es precisamente el valor de retorno(en caso de existir), de la expresión introducida. Este resultado se imprime en consola y con esta acción se termina la iteración del bucle y se da paso a la siguiente.
 
 
 
+\subsubsection{Namespace \textcolor{blue}{Hulk.Biblioteca.Tree}}\label{}
+Constituye una jerarquía de clases donde todas heredan de una principal, la clase abstracta \textit{\textcolor{blue}{Nodo}}. La jerarquía de clases se representa en el siguiente esquema:
+\newpage
+\begin{tikzpicture}[
+level distance=4cm,
+  grow=right,
+  level 1/.style={sibling distance=4cm},
+  level 2/.style={sibling distance=2cm},
+  level 3/.style={sibling distance=1cm},
+ every node/.style = {shape=rectangle, rounded corners,
+      draw, align=center}
+]
 
-\paragraph{\textcolor{blue}{} }\label{}
+  
+  % Nodos
+  \node[rectangle, draw, fill=blue!20] (A) at (0,0) {Nodo}
+    child {
+      node[rectangle, draw, fill=red!20] (B) {Expresion}
+        child {
+          node[rectangle, draw, fill=green!20] (C) {UnaryExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (D) {ParentesisExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (E) {LiteralExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (F) {BinaryExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (G) {AsignacionVariableExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (H) {DeclaracionNodo}
+          child {
+          node[rectangle, draw, fill=magenta!50] (X) {IFDeclaracionExpresion}
+        }
+        child {
+          node[rectangle, draw, fill=magenta!50] (Y) {ElseDeclaracion}
+        }
+        child {
+          node[rectangle, draw, fill=magenta!50] (Z) {VariableDeclaracionExpresion}
+        }
+        }
+        child {
+          node[rectangle, draw, fill=green!20] (I) {PrintExpresion}
+        }
+ child {
+          node[rectangle, draw, fill=green!20] (K) {FuncionCallExpresion}
+        }
+ child {
+          node[rectangle, draw, fill=green!20] (J) {FuncionDeclaracion}
+        }
+ child {
+          node[rectangle, draw, fill=green!20] (l) {IDExpresion}
+        }
+}
+child {
+      node[rectangle, draw, fill=red!20] (B) {Token}};
+\end{tikzpicture}
 
 
 
-\subsubsection{}\label{}
+\subsubsection{Namespace \textcolor{blue}{Hulk.Biblioteca.Semantic}}\label{}
+Está constituido por una jerarquía de clases similar a la del espacio de nombres \textcolor{blue}{Hulk.Biblioteca.Tree}. Los objetos de \textcolor{blue}{Hulk.Biblioteca.Semantic}, se nutren de las propiedades de las clases nombradas en el esquema anterior. La clase más importante es \textcolor{blue}{Semantic\_Parser}, donde se realiza el análisis semántico, a continuación se expone un listado con el código del método central del análisis:
+\begin{lstlisting}[language= Java]
+ private Semantic_Expresion ConectaExpresion(Expresion expresion)
+{
+            //Clasifica la expresion obtenida del parser de acuerdo su tipo y la envia
+            //a chequear al metodo correspondiente
+            switch (expresion.Type)
+            {
+                case TokenType.ParentesisExpresion:
+                    return ConectaParentesisExpresion((ParentesisExpresion)expresion);
+                case TokenType.BinaryExpresion:
+                    return ConectaBinaryExpresion((BinaryExpresion)expresion);
+                case TokenType.UnaryExpresion:
+                    return ConectaUnaryExpresion((UnaryExpresion)expresion);
+                case TokenType.LiteralExpresion:
+                    return ConectaLiteralExpresion((LiteralExpresion)expresion);
+                case TokenType.IDExpresion:
+                    return ConectaIDExpresion((IDExpresion)expresion);
+                case TokenType.AsignacionVariableExpresion:
+                    return ConectaAsignacionVariableExpresion((AsignacionVariableExpresion)expresion);
+                case TokenType.DeclaracionExpresion:
+                    return ConectaDeclaracionExpresion((DeclaracionExpresion)expresion);
+                case TokenType.CallFuncion:
+                    return ConectaFuncionCall((FuncionCallExpresion)expresion);
+                case TokenType.VariableDeclaracionExpresion:
+                    return ConectaVariableDeclaracion((VariableDeclaracionExpresion)expresion);
+                case TokenType.IFDeclaracionExpresion:
+                    return ConectaIfDeclaracion((IFDeclaracionExpresion)expresion);
+                case TokenType.PrintExpresion:
+                    return ConectaPrintExpresion((PrintExpresion)expresion);
+                default:
+                    return null;
+            }
+ }
+\end{lstlisting}
 
 
-\subsubsection{}\label{}
 
+\subsubsection{Namespace \textcolor{blue}{Hulk.Biblioteca.Servidor}}
+Este espacio de nombres está constituido por las clases  \textit{\textcolor{blue}{Servidor}} y  \textit{\textcolor{blue}{Retorno}}, que son los objetos que vinculan las fases del procesamiento de una expresión. El objeto de tipo  \textit{\textcolor{blue}{Retorno}} creado en el método Main contiene el resultado que se imprime en la consola,  el siguiente listado muestra la estructura de la clase:
+\begin{lstlisting}[language= Java]
+namespace Hulk.Biblioteca.Servidor
+{
+    public sealed class Retorno
+    {
+        public Retorno(IEnumerable<Error> errores, object value)
+        {
+            Errores = errores;
+            Value = value;
+        }
 
+        public IEnumerable<Error> Errores { get; }
+        //Valor que se imprime en consola
+        public object Value { get; }
+    }
 
+}
+\end{lstlisting}
 
-
-\subsubsection{}\label{}
+\subsection{Objetos esenciales}\label{}
+\paragraph{\textcolor{blue}{Lexer}: La clase Lexer se encarga de tokenizar la entrada del usuario. Es invocada desde el constructor de la clase Parser, pues así se inicializa el array de Token que utiliza la clase Parser para el análisis sintáctico. Cualquier carácter o cadena inválida es reconocida en esta clase, por tanto tiene un papel significativo en la detección de errores. }\label{}
+\paragraph{\textcolor{blue}{Parser}: En la clase Parser se realiza el análisis sintáctico. Mientras se recorre el array de tokens (\textcolor{blue}{Token[]}) creado con asistencia de la clase \textcolor{blue}{Lexer}, se busca la plantilla o patrón que rige la expresión introducida, en esto es esencial el método Coincidencia, que chequea si el tipo del token actual coincide con el tipo del esperado por el patrón y en este caso nos lo devuelve, de lo contrario agrega un error a la lista de errores de la clase Parser. }\label{}
+\paragraph{\textcolor{blue}{Semantic\_Parser}: El análisis semántico es el encargado de chuequear el sentido de las expresiones en el lenguaje y de garantizar que solo lleguen al evaluador expresiones correctas, de aquí su importancia. Otra de las tareas de esta clase es verificar la compatibilidad entre tipos y operaciones.}\label{}
+\paragraph{\textcolor{blue}{Evaluator} La clase Evaluator es instanciada en el método Sirve de la clase Servidor , que devuelve el objeto de tipo Retorno con la propiedad de tipo object que contiene la valor de retorno de la expresión. En el proceso de evaluación se toman los objetos semánticos resultantes de la fase anterior del análisis y mediante su propiedad \textcolor{blue}{SemanticType} Kind se llaman a los métodos destinados a evaluar cada tipo de objeto semántico.}\label{}
 
 
 
